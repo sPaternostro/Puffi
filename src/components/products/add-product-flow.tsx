@@ -18,17 +18,25 @@ import { StatusMessage } from "@/components/ui/status-message";
 import { useToast } from "@/components/ui/toast";
 import { ingredientLabel } from "@/lib/ingredients";
 import { categoryLabel } from "@/lib/product-categories";
+import { ui } from "@/lib/i18n/ui";
+import { useClientLocale } from "@/lib/i18n/client-locale";
+import type { AppLocale } from "@/types/database";
 import type { ProductCategory } from "@/types/database";
+
+function OpeningCamera() {
+  const locale = useClientLocale();
+  return (
+    <p className="flex items-center gap-2 text-sm text-foreground/70">
+      <Spinner /> {ui(locale).openingCamera}
+    </p>
+  );
+}
 
 const BarcodeScanner = dynamic(
   () => import("@/components/products/barcode-scanner").then((mod) => mod.BarcodeScanner),
   {
     ssr: false,
-    loading: () => (
-      <p className="flex items-center gap-2 text-sm text-foreground/70">
-        <Spinner /> Abriendo cámara…
-      </p>
-    ),
+    loading: () => <OpeningCamera />,
   },
 );
 
@@ -44,7 +52,15 @@ type FoundProduct = {
   rawIngredients: string | null;
 };
 
-export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string }) {
+export function AddProductFlow({
+  initialQuery = "",
+  locale,
+}: {
+  initialQuery?: string;
+  locale: AppLocale;
+}) {
+  const t = ui(locale);
+  const c = addCopy(locale);
   const router = useRouter();
   const { push } = useToast();
   const [mode, setMode] = useState<Mode>(initialQuery ? "search" : "choose");
@@ -57,7 +73,7 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
   const [lookingUp, setLookingUp] = useState(false);
   const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [savingLabel, setSavingLabel] = useState("Agregando a tu estantería…");
+  const [savingLabel, setSavingLabel] = useState(c.addingShelf);
   const picked = Object.values(selected);
 
   function goShelf(count = 1) {
@@ -138,8 +154,8 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
     for (const [index, hit] of hitsToAdd.entries()) {
       setSavingLabel(
         hitsToAdd.length === 1
-          ? `Agregando «${hit.name}»…`
-          : `Agregando ${index + 1} de ${hitsToAdd.length}…`,
+          ? c.addingNamed.replace("{name}", hit.name)
+          : c.addingIndex.replace("{index}", String(index + 1)).replace("{total}", String(hitsToAdd.length)),
       );
       const result = hit.localId
         ? await addExistingProductAction(hit.localId)
@@ -193,7 +209,7 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
         }}
       >
         <ChevronLeft size={16} />
-        Volver
+        {t.back}
       </button>
 
       {error ? (
@@ -204,7 +220,7 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
 
       {lookingUp ? (
         <p className="flex items-center gap-2 rounded-xl border border-line bg-card px-4 py-3 text-sm text-foreground/70">
-          <Spinner /> Buscando el producto…
+          <Spinner /> {t.lookingUpProduct}
         </p>
       ) : null}
 
@@ -217,11 +233,11 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
           <div>
             <p className="text-xs uppercase tracking-wide text-foreground/50">{found.brand}</p>
             <h2 className="text-xl font-semibold">{found.name}</h2>
-            <p className="mt-1 text-sm text-foreground/70">{categoryLabel(found.category)}</p>
+            <p className="mt-1 text-sm text-foreground/70">{categoryLabel(found.category, locale)}</p>
           </div>
           {found.ingredients.length > 0 ? (
             <p className="text-sm text-foreground/80">
-              Activos detectados: {found.ingredients.map(ingredientLabel).join(", ")}
+              {t.detectedActives}: {found.ingredients.map((key) => ingredientLabel(key, locale)).join(", ")}
             </p>
           ) : (
             <p className="text-sm text-foreground/70">
@@ -234,7 +250,7 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
             className="btn-primary"
             onClick={async () => {
               setSaving(true);
-              setSavingLabel("Agregando a tu estantería…");
+              setSavingLabel(c.addingShelf);
               setError(null);
               const result = await addCatalogProductAction({
                 barcode: found.barcode,
@@ -254,10 +270,10 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
           >
             {saving ? (
               <>
-                <Spinner /> Agregando…
+                <Spinner /> {c.adding}
               </>
             ) : (
-              "Agregar a mi estantería"
+              c.addToShelf
             )}
           </button>
           <button
@@ -269,7 +285,7 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
               setMode("manual");
             }}
           >
-            No es este, cargarlo a mano
+            {c.notThis}
           </button>
         </div>
       ) : null}
@@ -277,9 +293,9 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
       {!found && mode === "choose" ? (
         <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-card">
           {[
-            { id: "scan" as const, title: "Escanear código de barras", detail: "Usá la cámara o escribí el número." },
-            { id: "search" as const, title: "Buscar por nombre", detail: "Buscá por marca o un nombre corto." },
-            { id: "manual" as const, title: "Cargarlo yo", detail: "Nombre, marca, categoría y activos." },
+            { id: "scan" as const, title: c.scanTitle, detail: c.scanDetail },
+            { id: "search" as const, title: c.searchTitle, detail: c.searchDetail },
+            { id: "manual" as const, title: c.manualTitle, detail: c.manualDetail },
           ].map((item, index) => (
             <button
               key={item.id}
@@ -297,7 +313,11 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
       {!found && mode === "scan" ? (
         <div className="flex flex-col gap-4">
           <BarcodeScanner onDetected={(code) => void handleBarcode(code)} />
-          <ManualBarcodeFallback onLookup={(code) => void handleBarcode(code)} loading={lookingUp} />
+          <ManualBarcodeFallback
+            onLookup={(code) => void handleBarcode(code)}
+            loading={lookingUp}
+            locale={locale}
+          />
         </div>
       ) : null}
 
@@ -307,14 +327,14 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Marca o nombre corto, ej. CeraVe"
+              placeholder={c.searchPlaceholder}
               className="input-field flex-1"
               onKeyDown={(event) => {
                 if (event.key === "Enter") void search();
               }}
             />
             <button type="button" onClick={() => void search()} className="btn-primary shrink-0" disabled={searching}>
-              {searching ? <Spinner /> : "Buscar"}
+              {searching ? <Spinner /> : t.search}
             </button>
           </div>
           <p className="text-xs leading-5 text-foreground/55">
@@ -323,7 +343,7 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
           </p>
           {searching ? (
             <p className="flex items-center gap-2 rounded-xl border border-line bg-card px-4 py-3 text-sm">
-              <Spinner /> Buscando productos…
+              <Spinner /> {t.searchingProducts}
             </p>
           ) : null}
           {hits && hits.length === 0 && !searching ? (
@@ -368,7 +388,7 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
                         )}
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{hit.name}</p>
-                          <p className="text-sm text-foreground/60">{hit.brand ?? "Sin marca"}</p>
+                          <p className="text-sm text-foreground/60">{hit.brand ?? t.noBrand}</p>
                         </div>
                       </button>
                     </li>
@@ -385,14 +405,14 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
                   >
                     {saving ? (
                       <>
-                        <Spinner /> Agregando…
+                        <Spinner /> {c.adding}
                       </>
                     ) : picked.length === 0 ? (
-                      "Elegí uno o más"
+                      c.pickSome
                     ) : picked.length === 1 ? (
-                      `Agregar «${picked[0].name}»`
+                      c.addNamed.replace("{name}", picked[0].name)
                     ) : (
-                      `Agregar ${picked.length} productos`
+                      c.addCount.replace("{count}", String(picked.length))
                     )}
                   </button>
                 </div>
@@ -406,10 +426,11 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
         <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
           <ManualProductForm
             initial={{ barcode: notFoundBarcode ?? "" }}
-            submitLabel="Guardar y agregar"
+            locale={locale}
+            submitLabel={c.saveAndAdd}
             onSubmit={async (values) => {
               setSaving(true);
-              setSavingLabel("Guardando tu producto…");
+              setSavingLabel(c.savingProduct);
               const result = await addManualProductAction(values);
               if (!result.ok) {
                 setSaving(false);
@@ -428,10 +449,14 @@ export function AddProductFlow({ initialQuery = "" }: { initialQuery?: string })
 function ManualBarcodeFallback({
   onLookup,
   loading,
+  locale,
 }: {
   onLookup: (code: string) => void;
   loading: boolean;
+  locale: AppLocale;
 }) {
+  const t = ui(locale);
+  const c = addCopy(locale);
   const [code, setCode] = useState("");
   return (
     <form
@@ -444,12 +469,59 @@ function ManualBarcodeFallback({
       <input
         value={code}
         onChange={(event) => setCode(event.target.value)}
-        placeholder="O escribí el código"
+        placeholder={c.codePlaceholder}
         className="input-field flex-1"
       />
       <button type="submit" className="btn-primary" disabled={loading}>
-        {loading ? <Spinner /> : "Buscar"}
+        {loading ? <Spinner /> : t.search}
       </button>
     </form>
   );
+}
+
+function addCopy(locale: AppLocale) {
+  if (locale === "en") {
+    return {
+      addingShelf: "Adding to your shelf…",
+      scanTitle: "Scan barcode",
+      scanDetail: "Use the camera or type the number.",
+      searchTitle: "Search by name",
+      searchDetail: "Search by brand or a short name.",
+      manualTitle: "Add it myself",
+      manualDetail: "Name, brand, category, and actives.",
+      searchPlaceholder: "Brand or short name, e.g. CeraVe",
+      saveAndAdd: "Save and add",
+      codePlaceholder: "Or type the barcode",
+      adding: "Adding…",
+      addToShelf: "Add to my shelf",
+      notThis: "Not this one — add by hand",
+      pickSome: "Pick one or more",
+      addNamed: "Add “{name}”",
+      addCount: "Add {count} products",
+      savingProduct: "Saving your product…",
+      addingNamed: "Adding “{name}”…",
+      addingIndex: "Adding {index} of {total}…",
+    };
+  }
+  return {
+    addingShelf: "Agregando a tu estantería…",
+    scanTitle: "Escanear código de barras",
+    scanDetail: "Usá la cámara o escribí el número.",
+    searchTitle: "Buscar por nombre",
+    searchDetail: "Buscá por marca o un nombre corto.",
+    manualTitle: "Cargarlo yo",
+    manualDetail: "Nombre, marca, categoría y activos.",
+    searchPlaceholder: "Marca o nombre corto, ej. CeraVe",
+    saveAndAdd: "Guardar y agregar",
+    codePlaceholder: "O escribí el código",
+    adding: "Agregando…",
+    addToShelf: "Agregar a mi estantería",
+    notThis: "No es este, cargarlo a mano",
+    pickSome: "Elegí uno o más",
+    addNamed: "Agregar «{name}»",
+    addCount: "Agregar {count} productos",
+    savingProduct: "Guardando tu producto…",
+    addingNamed: "Agregando «{name}»…",
+    addingIndex: "Agregando {index} de {total}…",
+  };
 }

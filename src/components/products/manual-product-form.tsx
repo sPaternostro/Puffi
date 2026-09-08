@@ -5,7 +5,8 @@ import { useState } from "react";
 import { INGREDIENT_OPTIONS } from "@/lib/ingredients";
 import { PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import { Spinner } from "@/components/ui/spinner";
-import type { ProductCategory } from "@/types/database";
+import { ui } from "@/lib/i18n/ui";
+import type { AppLocale, ProductCategory } from "@/types/database";
 
 export type ManualValues = {
   name: string;
@@ -20,10 +21,17 @@ export type ManualValues = {
 type Props = {
   initial?: Partial<ManualValues>;
   submitLabel?: string;
+  locale?: AppLocale;
   onSubmit: (values: ManualValues) => Promise<void>;
 };
 
-export function ManualProductForm({ initial, submitLabel = "Guardar producto", onSubmit }: Props) {
+export function ManualProductForm({
+  initial,
+  submitLabel = "Guardar producto",
+  locale = "es",
+  onSubmit,
+}: Props) {
+  const t = ui(locale);
   const [name, setName] = useState(initial?.name ?? "");
   const [brand, setBrand] = useState(initial?.brand ?? "");
   const [category, setCategory] = useState<ProductCategory>(initial?.category ?? "other");
@@ -129,7 +137,7 @@ export function ManualProductForm({ initial, submitLabel = "Guardar producto", o
         >
           {PRODUCT_CATEGORIES.map((item) => (
             <option key={item.value} value={item.value}>
-              {item.label}
+              {locale === "en" ? item.labelEn : item.labelEs}
             </option>
           ))}
         </select>
@@ -155,7 +163,7 @@ export function ManualProductForm({ initial, submitLabel = "Guardar producto", o
                 checked={ingredients.includes(item.key)}
                 onChange={() => toggleIngredient(item.key)}
               />
-              {item.label}
+              {locale === "en" ? item.labelEn : item.labelEs}
             </label>
           ))}
         </div>
@@ -163,7 +171,7 @@ export function ManualProductForm({ initial, submitLabel = "Guardar producto", o
       <button type="submit" disabled={saving} className="btn-primary mt-2 ml-auto w-full sm:w-auto">
         {saving ? (
           <>
-            <Spinner /> Guardando…
+            <Spinner /> {t.saving}
           </>
         ) : (
           submitLabel

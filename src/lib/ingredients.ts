@@ -1,11 +1,13 @@
+import type { AppLocale } from "@/types/database";
+
 export const INGREDIENT_OPTIONS = [
-  { key: "retinol", label: "Retinol / retinoides" },
-  { key: "vitamin_c", label: "Vitamina C" },
-  { key: "niacinamide", label: "Niacinamida" },
-  { key: "aha", label: "AHA (glicólico, láctico, mandélico)" },
-  { key: "bha", label: "BHA (ácido salicílico)" },
-  { key: "benzoyl_peroxide", label: "Peróxido de benzoilo" },
-  { key: "spf", label: "Protector solar (SPF)" },
+  { key: "retinol", labelEs: "Retinol / retinoides", labelEn: "Retinol / retinoids" },
+  { key: "vitamin_c", labelEs: "Vitamina C", labelEn: "Vitamin C" },
+  { key: "niacinamide", labelEs: "Niacinamida", labelEn: "Niacinamide" },
+  { key: "aha", labelEs: "AHA (glicólico, láctico, mandélico)", labelEn: "AHA (glycolic, lactic, mandelic)" },
+  { key: "bha", labelEs: "BHA (ácido salicílico)", labelEn: "BHA (salicylic acid)" },
+  { key: "benzoyl_peroxide", labelEs: "Peróxido de benzoilo", labelEn: "Benzoyl peroxide" },
+  { key: "spf", labelEs: "Protector solar (SPF)", labelEn: "Sunscreen (SPF)" },
 ] as const;
 
 export type KnownIngredientKey = (typeof INGREDIENT_OPTIONS)[number]["key"];
@@ -53,6 +55,8 @@ export function detectIngredients(text: string | null | undefined): KnownIngredi
   return [...found];
 }
 
-export function ingredientLabel(key: string) {
-  return INGREDIENT_OPTIONS.find((item) => item.key === key)?.label ?? key;
+export function ingredientLabel(key: string, locale: AppLocale = "es") {
+  const item = INGREDIENT_OPTIONS.find((row) => row.key === key);
+  if (!item) return key;
+  return locale === "en" ? item.labelEn : item.labelEs;
 }

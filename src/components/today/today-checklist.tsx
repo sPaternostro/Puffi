@@ -5,6 +5,8 @@ import { Check, Moon, Sun } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { logKey } from "@/lib/today/keys";
 import { toggleTodayStepAction } from "@/lib/today/actions";
+import { displayProductName, ui } from "@/lib/i18n/ui";
+import type { AppLocale } from "@/types/database";
 import type { TimeOfDay } from "@/types/database";
 
 type Step = { productId: string; name: string; brand: string | null };
@@ -13,11 +15,14 @@ export function TodayChecklist({
   am,
   pm,
   initialDone,
+  locale,
 }: {
   am: Step[];
   pm: Step[];
   initialDone: Record<string, boolean>;
+  locale: AppLocale;
 }) {
+  const t = ui(locale);
   const [done, setDone] = useState(initialDone);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const seq = useRef<Record<string, number>>({});
@@ -46,28 +51,50 @@ export function TodayChecklist({
   return (
     <div className="mt-6 flex flex-col gap-6">
       <p className="text-sm text-foreground/60">
-        {checked} de {keys.length} · se reinicia mañana
+        {checked} {t.of} {keys.length} · {t.resetsTomorrow}
       </p>
-      <ChecklistColumn title="Mañana" timeOfDay="am" steps={am} done={done} saving={saving} onToggle={toggle} />
-      <ChecklistColumn title="Noche" timeOfDay="pm" steps={pm} done={done} saving={saving} onToggle={toggle} />
+      <ChecklistColumn
+        title={t.morning}
+        empty={t.nothingForThisMoment}
+        timeOfDay="am"
+        steps={am}
+        done={done}
+        saving={saving}
+        onToggle={toggle}
+        locale={locale}
+      />
+      <ChecklistColumn
+        title={t.night}
+        empty={t.nothingForThisMoment}
+        timeOfDay="pm"
+        steps={pm}
+        done={done}
+        saving={saving}
+        onToggle={toggle}
+        locale={locale}
+      />
     </div>
   );
 }
 
 function ChecklistColumn({
   title,
+  empty,
   timeOfDay,
   steps,
   done,
   saving,
   onToggle,
+  locale,
 }: {
   title: string;
+  empty: string;
   timeOfDay: TimeOfDay;
   steps: Step[];
   done: Record<string, boolean>;
   saving: Record<string, boolean>;
   onToggle: (timeOfDay: TimeOfDay, productId: string) => void;
+  locale: AppLocale;
 }) {
   return (
     <section className="rounded-2xl border border-line bg-card p-5">
@@ -80,7 +107,7 @@ function ChecklistColumn({
         {title}
       </h2>
       {steps.length === 0 ? (
-        <p className="mt-3 text-sm text-foreground/60">Nada para este momento.</p>
+        <p className="mt-3 text-sm text-foreground/60">{empty}</p>
       ) : (
         <ul className="mt-3 divide-y divide-line">
           {steps.map((step) => {
@@ -102,7 +129,7 @@ function ChecklistColumn({
                     {busy ? <Spinner className="h-3.5 w-3.5" /> : checked ? <Check size={14} /> : null}
                   </span>
                   <span className={checked ? "text-foreground/45 line-through" : ""}>
-                    <span className="block text-sm font-medium">{step.name}</span>
+                    <span className="block text-sm font-medium">{displayProductName(step.name, locale)}</span>
                     {step.brand ? (
                       <span className="block text-xs text-foreground/55">{step.brand}</span>
                     ) : null}

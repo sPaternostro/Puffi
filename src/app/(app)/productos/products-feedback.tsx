@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useToast } from "@/components/ui/toast";
+import type { AppLocale } from "@/types/database";
 
-export function ProductsFeedback({ added }: { added?: string }) {
+export function ProductsFeedback({ added, locale }: { added?: string; locale: AppLocale }) {
   const router = useRouter();
   const { push } = useToast();
   const count = Number(added ?? 0);
@@ -23,11 +24,21 @@ export function ProductsFeedback({ added }: { added?: string }) {
 
     push({
       kind: "success",
-      title: count === 1 ? "Ya está en tu estantería" : `Se agregaron ${count} productos`,
-      detail: "Podés seguir agregando o generar la rutina.",
+      title:
+        locale === "en"
+          ? count === 1
+            ? "It’s on your shelf"
+            : `${count} products added`
+          : count === 1
+            ? "Ya está en tu estantería"
+            : `Se agregaron ${count} productos`,
+      detail:
+        locale === "en"
+          ? "You can keep adding or generate the routine."
+          : "Podés seguir agregando o generar la rutina.",
     });
     router.replace("/productos");
-  }, [count, push, router]);
+  }, [count, locale, push, router]);
 
   return null;
 }

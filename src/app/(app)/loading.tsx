@@ -1,10 +1,7 @@
-import { Spinner } from "@/components/ui/spinner";
+import { AppLoading } from "@/components/i18n/app-loading";
+import { getLocale } from "@/lib/i18n/locale";
 
-export default function Loading() {
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center gap-2 text-sm text-foreground/70">
-      <Spinner />
-      Cargando…
-    </div>
-  );
+export default async function Loading() {
+  const locale = await getLocale();
+  return <AppLoading locale={locale} />;
 }

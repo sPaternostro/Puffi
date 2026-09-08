@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { GUIDE_STEPS, WELCOME_REMIND_AFTER_MS, WELCOME_STORAGE_KEY } from "@/lib/guide";
+import { guideSteps, WELCOME_REMIND_AFTER_MS, WELCOME_STORAGE_KEY } from "@/lib/guide";
+import { ui } from "@/lib/i18n/ui";
+import type { AppLocale } from "@/types/database";
 
-export function WelcomeGuide() {
+export function WelcomeGuide({ locale }: { locale: AppLocale }) {
   const [open, setOpen] = useState(false);
+  const t = ui(locale);
 
   useEffect(() => {
     try {
@@ -36,12 +39,10 @@ export function WelcomeGuide() {
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-primary-strong">
           <Sparkles size={20} />
         </div>
-        <h2 className="mt-4 text-2xl font-semibold tracking-tight">Así se usa Puffi</h2>
-        <p className="mt-2 text-sm leading-6 text-foreground/70">
-          Un vistazo rápido. Después lo encontrás en Cuenta, si lo necesitás.
-        </p>
+        <h2 className="mt-4 text-2xl font-semibold tracking-tight">{t.welcomeTitle}</h2>
+        <p className="mt-2 text-sm leading-6 text-foreground/70">{t.welcomeLead}</p>
         <ol className="mt-5 space-y-4">
-          {GUIDE_STEPS.map((step, index) => (
+          {guideSteps(locale).map((step, index) => (
             <li key={step.title} className="flex gap-3">
               <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-medium">
                 {index + 1}
@@ -54,7 +55,7 @@ export function WelcomeGuide() {
           ))}
         </ol>
         <button type="button" className="btn-primary mt-6 w-full" onClick={dismiss}>
-          Entendido
+          {t.gotIt}
         </button>
       </div>
     </div>

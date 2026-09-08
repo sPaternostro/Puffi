@@ -5,6 +5,10 @@ import type { AppLocale } from "@/types/database";
 export const LOCALE_COOKIE = "puffi-locale";
 
 export async function getLocale(): Promise<AppLocale> {
+  const jar = await cookies();
+  const fromCookie = jar.get(LOCALE_COOKIE)?.value;
+  if (fromCookie === "en" || fromCookie === "es") return fromCookie;
+
   try {
     const supabase = await createClient();
     const {
@@ -18,8 +22,5 @@ export async function getLocale(): Promise<AppLocale> {
     /* no session */
   }
 
-  const jar = await cookies();
-  const fromCookie = jar.get(LOCALE_COOKIE)?.value;
-  if (fromCookie === "en" || fromCookie === "es") return fromCookie;
   return "es";
 }

@@ -6,19 +6,25 @@ import { Sparkles } from "lucide-react";
 import { generateRoutineAction } from "@/lib/routine/actions";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
+import type { AppLocale } from "@/types/database";
 
-const PHASES = [
-  "Mirando lo que tenés…",
-  "Ordenando mañana y noche…",
-  "Revisando si hay activos que no combinan…",
-];
+const PHASES = {
+  es: [
+    "Mirando lo que tenés…",
+    "Ordenando mañana y noche…",
+    "Revisando si hay activos que no combinan…",
+  ],
+  en: ["Looking at what you have…", "Sorting morning and night…", "Checking actives that don’t mix…"],
+} as const;
 
 export function GenerateRoutineButton({
   label,
   redirectTo,
+  locale = "es",
 }: {
   label: string;
   redirectTo?: string;
+  locale?: AppLocale;
 }) {
   const router = useRouter();
   const { push } = useToast();
@@ -28,10 +34,10 @@ export function GenerateRoutineButton({
   useEffect(() => {
     if (!pending) return;
     const timer = window.setInterval(() => {
-      setPhase((current) => (current + 1) % PHASES.length);
+      setPhase((current) => (current + 1) % PHASES[locale].length);
     }, 900);
     return () => window.clearInterval(timer);
-  }, [pending]);
+  }, [pending, locale]);
 
   return (
     <>
@@ -61,7 +67,7 @@ export function GenerateRoutineButton({
       >
         {pending ? (
           <>
-            <Spinner /> Armando…
+            <Spinner /> {locale === "en" ? "Building…" : "Armando…"}
           </>
         ) : (
           <>
@@ -76,8 +82,10 @@ export function GenerateRoutineButton({
             <span className="animate-orb absolute inset-0 rounded-full bg-accent" />
             <Sparkles className="animate-spark relative text-primary-strong" size={28} />
           </div>
-          <p className="mt-6 text-lg font-medium tracking-tight">Armando tu rutina</p>
-          <p className="mt-2 text-sm text-foreground/65">{PHASES[phase]}</p>
+          <p className="mt-6 text-lg font-medium tracking-tight">
+            {locale === "en" ? "Building your routine" : "Armando tu rutina"}
+          </p>
+          <p className="mt-2 text-sm text-foreground/65">{PHASES[locale][phase]}</p>
         </div>
       ) : null}
     </>

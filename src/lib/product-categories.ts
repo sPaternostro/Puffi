@@ -1,20 +1,23 @@
 import type { ProductCategory } from "@/types/database";
+import type { AppLocale } from "@/types/database";
 
-export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
-  { value: "cleanser", label: "Limpiador" },
-  { value: "toner", label: "Tónico" },
-  { value: "essence", label: "Esencia" },
-  { value: "serum", label: "Sérum" },
-  { value: "treatment", label: "Tratamiento" },
-  { value: "moisturizer", label: "Hidratante" },
-  { value: "oil", label: "Aceite / oclusivo" },
-  { value: "sunscreen", label: "Protector solar" },
-  { value: "mask", label: "Mascarilla" },
-  { value: "exfoliant", label: "Exfoliante" },
-  { value: "eye_cream", label: "Contorno de ojos" },
-  { value: "other", label: "Otro" },
+export const PRODUCT_CATEGORIES: { value: ProductCategory; labelEs: string; labelEn: string }[] = [
+  { value: "cleanser", labelEs: "Limpiador", labelEn: "Cleanser" },
+  { value: "toner", labelEs: "Tónico", labelEn: "Toner" },
+  { value: "essence", labelEs: "Esencia", labelEn: "Essence" },
+  { value: "serum", labelEs: "Sérum", labelEn: "Serum" },
+  { value: "treatment", labelEs: "Tratamiento", labelEn: "Treatment" },
+  { value: "moisturizer", labelEs: "Hidratante", labelEn: "Moisturizer" },
+  { value: "oil", labelEs: "Aceite / oclusivo", labelEn: "Oil / occlusive" },
+  { value: "sunscreen", labelEs: "Protector solar", labelEn: "Sunscreen" },
+  { value: "mask", labelEs: "Mascarilla", labelEn: "Mask" },
+  { value: "exfoliant", labelEs: "Exfoliante", labelEn: "Exfoliant" },
+  { value: "eye_cream", labelEs: "Contorno de ojos", labelEn: "Eye cream" },
+  { value: "other", labelEs: "Otro", labelEn: "Other" },
 ];
 
-export function categoryLabel(category: ProductCategory) {
-  return PRODUCT_CATEGORIES.find((item) => item.value === category)?.label ?? category;
+export function categoryLabel(category: ProductCategory, locale: AppLocale = "es") {
+  const item = PRODUCT_CATEGORIES.find((row) => row.value === category);
+  if (!item) return category;
+  return locale === "en" ? item.labelEn : item.labelEs;
 }

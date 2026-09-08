@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getShelfAction, type ShelfProduct } from "@/lib/products/actions";
 import { generateRoutine, type GeneratedRoutine } from "@/lib/routine/engine";
 import { MIN_PRODUCTS_FOR_ROUTINE } from "@/lib/plans";
+import { getLocale } from "@/lib/i18n/locale";
 import type { TimeOfDay } from "@/types/database";
 
 export type SavedRoutine = GeneratedRoutine & {
@@ -54,16 +55,17 @@ export async function getRoutineAction(): Promise<{
     .map((step) => byId.get(step.product_id))
     .filter((item): item is ShelfProduct => Boolean(item));
 
+  const locale = await getLocale();
   const { data: profile } = await admin
     .from("users")
-    .select("skin_goal, locale")
+    .select("skin_goal")
     .eq("id", user.id)
     .maybeSingle();
   const { data: conflicts } = await admin
     .from("ingredient_conflicts")
     .select("ingredient_a, ingredient_b, severity, explanation_es, explanation_en");
 
-  const live = generateRoutine(shelf, conflicts ?? [], profile?.skin_goal ?? null, profile?.locale ?? "es");
+  const live = generateRoutine(shelf, conflicts ?? [], profile?.skin_goal ?? null, locale);
 
   return {
     shelfCount: shelf.length,
@@ -94,16 +96,17 @@ export async function generateRoutineAction(): Promise<
   }
 
   const admin = createAdminClient();
+  const locale = await getLocale();
   const { data: profile } = await admin
     .from("users")
-    .select("skin_goal, locale")
+    .select("skin_goal")
     .eq("id", user.id)
     .maybeSingle();
   const { data: conflicts } = await admin
     .from("ingredient_conflicts")
     .select("ingredient_a, ingredient_b, severity, explanation_es, explanation_en");
 
-  const generated = generateRoutine(shelf, conflicts ?? [], profile?.skin_goal ?? null, profile?.locale ?? "es");
+  const generated = generateRoutine(shelf, conflicts ?? [], profile?.skin_goal ?? null, locale);
 
   await admin.from("routine_sets").update({ is_active: false }).eq("user_id", user.id);
 

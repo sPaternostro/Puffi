@@ -18,7 +18,7 @@ export function AppShell({ children, locale }: { children: React.ReactNode; loca
         <LegalFooter locale={locale} />
       </main>
       <BottomNav locale={locale} />
-      <WelcomeGuide />
+      <WelcomeGuide locale={locale} />
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { getRoutineAction } from "@/lib/routine/actions";
 import { ingredientLabel } from "@/lib/ingredients";
 import { categoryLabel } from "@/lib/product-categories";
 import { FREE_PRODUCT_LIMIT, MIN_PRODUCTS_FOR_ROUTINE } from "@/lib/plans";
+import { getLocale } from "@/lib/i18n/locale";
+import { fill, ui, displayProductName } from "@/lib/i18n/ui";
 
 export default async function ProductsPage({
   searchParams,
@@ -18,31 +20,39 @@ export default async function ProductsPage({
   const shelf = await getShelfAction();
   const { routine, needsRefresh } = await getRoutineAction();
   const params = await searchParams;
+  const locale = await getLocale();
+  const t = ui(locale);
 
   return (
     <div>
-      <ProductsFeedback added={params.added} />
+      <ProductsFeedback added={params.added} locale={locale} />
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Productos</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.products}</h1>
           <p className="mt-2 max-w-xl text-sm text-foreground/70">
             {shelf.length === 0
-              ? "Cargá lo que ya tenés (o lo que querés comprar). Con 1 producto ya podés generar la rutina. El plan free permite hasta 8."
-              : `${shelf.length} producto${shelf.length === 1 ? "" : "s"} · máximo ${FREE_PRODUCT_LIMIT} en plan free.`}
+              ? t.emptyShelfLead
+              : fill(t.shelfCount, {
+                  count: shelf.length,
+                  s: shelf.length === 1 ? "" : "s",
+                  max: FREE_PRODUCT_LIMIT,
+                })}
           </p>
         </div>
         {shelf.length >= MIN_PRODUCTS_FOR_ROUTINE && !routine ? (
-          <GenerateRoutineButton label="Generar rutina" redirectTo="/rutina" />
+          <GenerateRoutineButton label={t.generateRoutine} redirectTo="/rutina" locale={locale} />
         ) : null}
       </div>
-      {needsRefresh ? <div className="mt-6"><RoutineRefreshBanner /></div> : null}
+      {needsRefresh ? (
+        <div className="mt-6">
+          <RoutineRefreshBanner locale={locale} />
+        </div>
+      ) : null}
 
       {shelf.length === 0 ? (
         <div className="mt-8 rounded-2xl border border-line bg-card p-8">
-          <p className="font-medium">Todavía no hay productos</p>
-          <p className="mt-2 text-sm leading-6 text-foreground/70">
-            Escaneá, buscá por marca o cargá a mano. Después generá el orden de mañana y noche.
-          </p>
+          <p className="font-medium">{t.noProductsYet}</p>
+          <p className="mt-2 text-sm leading-6 text-foreground/70">{t.emptyShelfHint}</p>
         </div>
       ) : (
         <ul className="mt-8 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-card">
@@ -57,17 +67,17 @@ export default async function ProductsPage({
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{item.name}</p>
+                <p className="truncate font-medium">{displayProductName(item.name, locale)}</p>
                 <p className="text-sm text-foreground/60">
-                  {item.brand ?? "Sin marca"} · {categoryLabel(item.category)}
+                  {item.brand ?? t.noBrand} · {categoryLabel(item.category, locale)}
                 </p>
                 {item.ingredients.length > 0 ? (
                   <p className="mt-1 text-xs text-foreground/50">
-                    {item.ingredients.map(ingredientLabel).join(" · ")}
+                    {item.ingredients.map((key) => ingredientLabel(key, locale)).join(" · ")}
                   </p>
                 ) : null}
               </div>
-              <RemoveProductButton id={item.id} />
+              <RemoveProductButton id={item.id} locale={locale} />
             </li>
           ))}
         </ul>
@@ -75,7 +85,7 @@ export default async function ProductsPage({
 
       <Link href="/productos/agregar" className="btn-primary btn-lg mt-6">
         <Plus size={18} />
-        Agregar producto
+        {t.addProduct}
       </Link>
     </div>
   );
