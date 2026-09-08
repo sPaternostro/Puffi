@@ -1,0 +1,67 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { HowToUseCard } from "@/components/layout/how-to-use";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { getLocale } from "@/lib/i18n/locale";
+import Link from "next/link";
+
+export default async function AccountPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const locale = await getLocale();
+  const { data: profile } = await supabase
+    .from("users")
+    .select("email, plan, locale")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const en = locale === "en";
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        {en ? "Account" : "Cuenta"}
+      </h1>
+      <div className="rounded-2xl border border-line bg-card p-6 sm:p-8">
+        <dl className="space-y-4 text-sm">
+          <div className="flex justify-between gap-4 border-b border-line pb-3">
+            <dt className="text-foreground/60">Email</dt>
+            <dd className="text-right">{profile?.email ?? user.email}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-foreground/60">Plan</dt>
+            <dd className="capitalize">{profile?.plan ?? "free"}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-4 border-t border-line pt-3">
+            <dt className="text-foreground/60">{en ? "Language" : "Idioma"}</dt>
+            <dd>
+              <LocaleSwitcher locale={locale} />
+            </dd>
+          </div>
+        </dl>
+        <p className="mt-6 text-xs leading-5 text-foreground/55">
+          {en
+            ? "Puffi does not replace a doctor. Product data comes from public sources and from what you add."
+            : "Puffi no reemplaza a un médico. Los datos de productos salen de fuentes públicas y de lo que cargás."}{" "}
+          <Link href="/legal" className="underline">
+            {en ? "Legal notice" : "Aviso legal"}
+          </Link>
+        </p>
+        <div className="mt-8 flex justify-end">
+          <div className="w-full sm:w-auto">
+            <SignOutButton />
+          </div>
+        </div>
+      </div>
+      <HowToUseCard />
+    </div>
+  );
+}
