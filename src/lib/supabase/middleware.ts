@@ -33,9 +33,11 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isOnboarding = path.startsWith("/onboarding");
   const isAuthPage = path === "/login" || path === "/signup";
+  const isResetPassword = path.startsWith("/reset-password");
   const skipOnboardingGate =
     isOnboarding ||
     isAuthPage ||
+    isResetPassword ||
     path === "/" ||
     path.startsWith("/legal") ||
     path.startsWith("/auth");
