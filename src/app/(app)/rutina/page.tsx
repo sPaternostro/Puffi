@@ -32,8 +32,11 @@ export default async function RoutinePage() {
         {canGenerate && !routine ? (
           <GenerateRoutineButton label={t.generateRoutine} locale={locale} />
         ) : null}
-        {canGenerate && routine && isPro ? (
-          <GenerateRoutineButton label={t.newRoutine} locale={locale} asNew askName />
+        {canGenerate && routine ? (
+          <div className="flex flex-wrap gap-2">
+            <GenerateRoutineButton label={t.updateRoutine} locale={locale} />
+            {isPro ? <GenerateRoutineButton label={t.newRoutine} locale={locale} asNew askName /> : null}
+          </div>
         ) : null}
       </div>
 

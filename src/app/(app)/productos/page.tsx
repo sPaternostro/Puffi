@@ -47,6 +47,9 @@ export default async function ProductsPage({
         {shelf.length >= MIN_PRODUCTS_FOR_ROUTINE && !routine ? (
           <GenerateRoutineButton label={t.generateRoutine} redirectTo="/rutina" locale={locale} />
         ) : null}
+        {shelf.length >= MIN_PRODUCTS_FOR_ROUTINE && routine ? (
+          <GenerateRoutineButton label={t.updateRoutine} redirectTo="/rutina" locale={locale} />
+        ) : null}
       </div>
       {needsRefresh ? (
         <div className="mt-6">

@@ -58,9 +58,6 @@ export async function getRoutineAction(): Promise<{
     .eq("routine_set_id", set.id)
     .order("step_order");
 
-  const shelfIds = new Set(shelf.map((item) => item.productId));
-  const needsRefresh = (steps ?? []).some((step) => !shelfIds.has(step.product_id));
-
   const byId = new Map(shelf.map((item) => [item.productId, item]));
   const am = (steps ?? [])
     .filter((step) => step.time_of_day === "am")
@@ -77,6 +74,17 @@ export async function getRoutineAction(): Promise<{
     .select("ingredient_a, ingredient_b, severity, explanation_es, explanation_en");
 
   const live = generateRoutine(shelf, conflicts ?? [], profile?.skin_goal ?? null, locale);
+  const savedAm = (steps ?? []).filter((step) => step.time_of_day === "am").map((step) => step.product_id);
+  const savedPm = (steps ?? []).filter((step) => step.time_of_day === "pm").map((step) => step.product_id);
+  const needsRefresh =
+    !sameIdList(savedAm, live.am.map((item) => item.productId)) ||
+    !sameIdList(savedPm, live.pm.map((item) => item.productId));
+
+  const savedAm = (steps ?? []).filter((step) => step.time_of_day === "am").map((step) => step.product_id);
+  const savedPm = (steps ?? []).filter((step) => step.time_of_day === "pm").map((step) => step.product_id);
+  const liveAm = live.am.map((item) => item.productId);
+  const livePm = live.pm.map((item) => item.productId);
+  const needsRefresh = !sameIdList(savedAm, liveAm) || !sameIdList(savedPm, livePm);
 
   return {
     shelfCount: shelf.length,
@@ -202,4 +210,8 @@ function uniqueSetName(desired: string, taken: string[]) {
     if (!lower.has(next.toLowerCase())) return next;
   }
   return `${base} ${Date.now()}`.slice(0, 40);
+}
+
+function sameIdList(a: string[], b: string[]) {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
 }
