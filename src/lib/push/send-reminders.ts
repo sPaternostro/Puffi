@@ -73,19 +73,18 @@ export async function sendDueReminders() {
 
     const locale = (profile.locale === "en" ? "en" : "es") as AppLocale;
     const copy = ui(locale);
-    const inWindow = local.minute < 20;
 
     const jobs: { kind: "am" | "pm"; due: boolean; last: string | null; title: string; body: string }[] = [
       {
         kind: "am",
-        due: Boolean(profile.remind_am && hasAm && inWindow && local.hour === AM_HOUR && row.last_am_sent_on !== local.date),
+        due: Boolean(profile.remind_am && hasAm && local.hour === AM_HOUR && row.last_am_sent_on !== local.date),
         last: row.last_am_sent_on,
         title: copy.pushAmTitle,
         body: copy.pushAmBody,
       },
       {
         kind: "pm",
-        due: Boolean(profile.remind_pm && hasPm && inWindow && local.hour === PM_HOUR && row.last_pm_sent_on !== local.date),
+        due: Boolean(profile.remind_pm && hasPm && local.hour === PM_HOUR && row.last_pm_sent_on !== local.date),
         last: row.last_pm_sent_on,
         title: copy.pushPmTitle,
         body: copy.pushPmBody,
