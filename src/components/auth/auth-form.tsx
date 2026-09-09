@@ -21,6 +21,7 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [oauthPending, setOauthPending] = useState(false);
   const t = authCopy(locale);
   const chrome = ui(locale);
 
@@ -48,6 +49,7 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (oauthPending || loading) return;
     setError(null);
     setInfo(null);
     setLoading(true);
@@ -93,7 +95,9 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
   }
 
   async function onGoogle() {
+    if (oauthPending || loading) return;
     setError(null);
+    setOauthPending(true);
     const supabase = createClient();
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -102,6 +106,7 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
       },
     });
     if (oauthError) {
+      setOauthPending(false);
       setError(t.oauthOpenFail);
     }
   }
@@ -112,9 +117,23 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">{labels.title}</h1>
       <p className="mt-2 text-sm leading-6 text-foreground/70">{t.tagline}</p>
 
-      <button type="button" onClick={onGoogle} className="btn-secondary mt-8 w-full">
-        <GoogleIcon />
-        {t.continueGoogle}
+      <button
+        type="button"
+        onClick={() => void onGoogle()}
+        disabled={oauthPending || loading}
+        aria-busy={oauthPending}
+        className="btn-secondary mt-8 w-full"
+      >
+        {oauthPending ? (
+          <>
+            <Spinner /> {t.connectingGoogle}
+          </>
+        ) : (
+          <>
+            <GoogleIcon />
+            {t.continueGoogle}
+          </>
+        )}
       </button>
 
       <div className="my-6 flex items-center gap-3 text-xs tracking-wide text-foreground/40 uppercase">
@@ -159,7 +178,7 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
           </StatusMessage>
         ) : null}
 
-        <button type="submit" disabled={loading} className="btn-primary mt-2 w-full">
+        <button type="submit" disabled={loading || oauthPending} className="btn-primary mt-2 w-full">
           {loading ? (
             <>
               <Spinner /> {mode === "login" ? t.loggingIn : t.creatingAccount}
@@ -182,6 +201,12 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
           {chrome.legal}
         </Link>
       </p>
+      {oauthPending ? (
+        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center bg-[#f7f4f0]/88 px-6 backdrop-blur-sm">
+          <Spinner className="h-7 w-7" />
+          <p className="mt-4 text-center text-sm font-medium">{t.connectingGoogle}</p>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -80,12 +80,6 @@ export async function getRoutineAction(): Promise<{
     !sameIdList(savedAm, live.am.map((item) => item.productId)) ||
     !sameIdList(savedPm, live.pm.map((item) => item.productId));
 
-  const savedAm = (steps ?? []).filter((step) => step.time_of_day === "am").map((step) => step.product_id);
-  const savedPm = (steps ?? []).filter((step) => step.time_of_day === "pm").map((step) => step.product_id);
-  const liveAm = live.am.map((item) => item.productId);
-  const livePm = live.pm.map((item) => item.productId);
-  const needsRefresh = !sameIdList(savedAm, liveAm) || !sameIdList(savedPm, livePm);
-
   return {
     shelfCount: shelf.length,
     min: MIN_PRODUCTS_FOR_ROUTINE,

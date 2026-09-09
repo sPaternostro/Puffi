@@ -3,6 +3,7 @@ import type { AppLocale } from "@/types/database";
 const es = {
   tagline: "Rutinas de skincare con el orden correcto.",
   continueGoogle: "Continuar con Google",
+  connectingGoogle: "Abriendo Google…",
   orEmail: "o con email",
   email: "Email",
   password: "Contraseña",
@@ -31,6 +32,7 @@ const es = {
 const en = {
   tagline: "Skincare routines in the right order.",
   continueGoogle: "Continue with Google",
+  connectingGoogle: "Opening Google…",
   orEmail: "or with email",
   email: "Email",
   password: "Password",
