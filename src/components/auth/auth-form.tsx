@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { StatusMessage } from "@/components/ui/status-message";
 import { authCopy } from "@/lib/i18n/auth";
 import { ui } from "@/lib/i18n/ui";
+import { getPublicSiteUrl } from "@/lib/site-url";
 import type { AppLocale } from "@/types/database";
 
 type Mode = "login" | "signup";
@@ -72,7 +73,7 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${getPublicSiteUrl()}/auth/callback`,
       },
     });
     setLoading(false);
@@ -97,7 +98,7 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/`,
+        redirectTo: `${getPublicSiteUrl()}/auth/callback?next=/`,
       },
     });
     if (oauthError) {
@@ -106,7 +107,7 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-line bg-card p-8 sm:p-10">
+    <div className="w-full max-w-md rounded-2xl border border-line bg-card p-5 sm:p-10">
       <p className="text-lg font-semibold tracking-tight">Puffi</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">{labels.title}</h1>
       <p className="mt-2 text-sm leading-6 text-foreground/70">{t.tagline}</p>

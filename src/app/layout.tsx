@@ -29,13 +29,16 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#f7f4f0",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   return (
-    <html lang={locale} className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">
+    <html lang={locale} className={`${inter.variable} h-full max-w-full overflow-x-clip antialiased`}>
+      <body className="flex min-h-dvh max-w-full flex-col overflow-x-clip font-sans">
         <ToastProvider>
           <PwaRegister />
           {children}

@@ -74,6 +74,7 @@ export function AddProductFlow({
   const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingLabel, setSavingLabel] = useState(c.addingShelf);
+  const [scanLocked, setScanLocked] = useState(false);
   const picked = Object.values(selected);
 
   function goShelf(count = 1) {
@@ -82,6 +83,8 @@ export function AddProductFlow({
   }
 
   async function handleBarcode(code: string) {
+    if (scanLocked) return;
+    setScanLocked(true);
     setError(null);
     setFound(null);
     setLookingUp(true);
@@ -99,6 +102,7 @@ export function AddProductFlow({
       }
       setFound(result);
     } catch {
+      setScanLocked(false);
       setError({
         title: "No se pudo consultar el código.",
         hint: "Revisá la conexión e intentá de nuevo, o cargalo a mano.",
@@ -203,6 +207,7 @@ export function AddProductFlow({
             setError(null);
             setHits(null);
             setSelected({});
+            setScanLocked(false);
             return;
           }
           router.push("/productos");
@@ -311,8 +316,8 @@ export function AddProductFlow({
       ) : null}
 
       {!found && mode === "scan" ? (
-        <div className="flex flex-col gap-4">
-          <BarcodeScanner onDetected={(code) => void handleBarcode(code)} />
+        <div className="flex min-w-0 max-w-full flex-col gap-4">
+          {scanLocked ? null : <BarcodeScanner onDetected={(code) => void handleBarcode(code)} />}
           <ManualBarcodeFallback
             onLookup={(code) => void handleBarcode(code)}
             loading={lookingUp}

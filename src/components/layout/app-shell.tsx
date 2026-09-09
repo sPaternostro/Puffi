@@ -16,14 +16,14 @@ export function AppShell({
   isPro: boolean;
 }) {
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-dvh max-w-full flex-col overflow-x-clip">
       <NavigationProgress />
       <SiteHeader locale={locale} isPro={isPro} />
-      <div className="flex h-12 items-center justify-center gap-2 border-b border-line bg-card md:hidden">
+      <div className="flex h-12 items-center justify-center gap-2 border-b border-line bg-card pt-[env(safe-area-inset-top)] md:hidden">
         <p className="text-base font-semibold tracking-tight">Puffi</p>
         {isPro ? <ProBadge /> : null}
       </div>
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 pb-24 sm:px-6 md:py-10 md:pb-10">
+      <main className="mx-auto w-full min-w-0 max-w-4xl flex-1 px-4 py-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:px-6 md:py-10 md:pb-10">
         {children}
         <LegalFooter locale={locale} />
       </main>

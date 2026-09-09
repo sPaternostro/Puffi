@@ -50,7 +50,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4 md:top-20">
+      <div className="pointer-events-none fixed inset-x-0 top-[max(1rem,env(safe-area-inset-top))] z-50 flex justify-center px-4 md:top-20">
         <div className="flex w-full max-w-sm flex-col gap-2">
           {toasts.map((toast) => {
             const Icon = ICONS[toast.kind];

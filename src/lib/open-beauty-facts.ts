@@ -73,25 +73,34 @@ export function mapObfProduct(product: ObfApiProduct, fallbackBarcode = ""): Obf
 
 export async function lookupOpenBeautyFacts(barcode: string): Promise<ObfLookup> {
   const clean = barcode.replace(/\D/g, "");
-  const response = await fetch(
-    `https://world.openbeautyfacts.org/api/v2/product/${clean}.json`,
-            { headers: UA, cache: "no-store" },
-  );
-
-  if (response.status === 404) {
+  if (clean.length < 8) {
     return { found: false, barcode: clean };
   }
 
-  if (!response.ok) {
-    throw new Error("Open Beauty Facts no respondió");
-  }
+  try {
+    const response = await fetch(`https://world.openbeautyfacts.org/api/v2/product/${clean}.json`, {
+      headers: UA,
+      cache: "no-store",
+      signal: AbortSignal.timeout(12000),
+    });
 
-  const data = (await response.json()) as ObfResponse;
-  if (data.status === 0 || !data.product) {
+    if (response.status === 404) {
+      return { found: false, barcode: clean };
+    }
+
+    if (!response.ok) {
+      return { found: false, barcode: clean };
+    }
+
+    const data = (await response.json()) as ObfResponse;
+    if (data.status === 0 || !data.product) {
+      return { found: false, barcode: clean };
+    }
+
+    return { found: true, ...mapObfProduct(data.product, clean) };
+  } catch {
     return { found: false, barcode: clean };
   }
-
-  return { found: true, ...mapObfProduct(data.product, clean) };
 }
 
 export async function searchOpenBeautyFacts(query: string): Promise<ObfProduct[]> {

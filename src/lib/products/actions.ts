@@ -54,7 +54,11 @@ async function assertCanAddProduct(userId: string): Promise<ActionResult> {
 
 export async function lookupBarcodeAction(barcode: string) {
   await requireUser();
-  return lookupOpenBeautyFacts(barcode);
+  try {
+    return await lookupOpenBeautyFacts(barcode);
+  } catch {
+    return { found: false as const, barcode: barcode.replace(/\D/g, "") };
+  }
 }
 
 export type ProductSearchHit = {
