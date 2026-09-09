@@ -10,11 +10,11 @@ const es = {
   showPassword: "Mostrar contraseña",
   hidePassword: "Ocultar contraseña",
   forgotPassword: "¿Olvidaste tu contraseña?",
-  forgotLead: "Escribí el email de la cuenta. Si existe, te mandamos un enlace.",
+  forgotLead: "Escribí el email de la cuenta. Si existe, te mandamos un enlace (a veces cae en spam).",
+  forgotSent: "Si hay una cuenta con ese email, te mandamos un enlace. Si no lo ves, mirá spam.",
+  forgotSentHint: "Suele tardar un minuto. Revisá spam y promociones; el enlace vence en un rato.",
   forgotSubmit: "Enviar mail",
   forgotSending: "Enviando…",
-  forgotSent: "Si hay una cuenta con ese email, te mandamos un enlace para elegir una nueva.",
-  forgotSentHint: "Revisá bandeja y spam. El enlace vence en un rato.",
   forgotBack: "Volver a entrar",
   resetTitle: "Nueva contraseña",
   resetSubmit: "Guardar contraseña",
@@ -42,8 +42,8 @@ const es = {
   badCredentials: "Email o contraseña no coinciden. Revisalos e intentá de nuevo.",
   passwordHint: "Revisá el email y la contraseña, o usá “olvidé mi contraseña”.",
   signupFail: "No pudimos crear la cuenta. Probá con otro email o entrá si ya tenés una.",
-  confirmEmail: "Te enviamos un email para confirmar la cuenta. Revisa tu bandeja.",
-  confirmEmailHint: "Si no llega, revisá spam. Después podés entrar desde esta misma pantalla.",
+  confirmEmail: "Te enviamos un email para confirmar la cuenta. Si no lo ves, mirá spam.",
+  confirmEmailHint: "Revisá spam y promociones. Después podés entrar desde esta misma pantalla.",
 };
 
 const en = {
@@ -56,11 +56,11 @@ const en = {
   showPassword: "Show password",
   hidePassword: "Hide password",
   forgotPassword: "Forgot your password?",
-  forgotLead: "Enter the account email. If it exists, we’ll send a link.",
+  forgotLead: "Enter the account email. If it exists, we’ll send a link (it may land in spam).",
+  forgotSent: "If there’s an account with that email, we sent a link. If you don’t see it, check spam.",
+  forgotSentHint: "It can take a minute. Check spam and promotions; the link expires after a while.",
   forgotSubmit: "Send email",
   forgotSending: "Sending…",
-  forgotSent: "If there’s an account with that email, we sent a link to set a new password.",
-  forgotSentHint: "Check inbox and spam. The link expires after a while.",
   forgotBack: "Back to log in",
   resetTitle: "New password",
   resetSubmit: "Save password",
@@ -87,8 +87,8 @@ const en = {
   badCredentials: "Email or password don’t match. Check them and try again.",
   passwordHint: "Check the email and password, or use “forgot password”.",
   signupFail: "We couldn’t create the account. Try another email, or log in if you already have one.",
-  confirmEmail: "We sent an email to confirm your account. Check your inbox.",
-  confirmEmailHint: "If it doesn’t arrive, check spam. Then you can log in from this same screen.",
+  confirmEmail: "We sent an email to confirm your account. If you don’t see it, check spam.",
+  confirmEmailHint: "Check spam and promotions. Then you can log in from this same screen.",
 };
 
 export function authCopy(locale: AppLocale) {

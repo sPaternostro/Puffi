@@ -4,11 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/spinner";
 import { StatusMessage } from "@/components/ui/status-message";
 import { authCopy } from "@/lib/i18n/auth";
 import type { AppLocale } from "@/types/database";
+
+function BrandRow({ locale }: { locale: AppLocale }) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <p className="text-lg font-semibold tracking-tight">Puffi</p>
+      <LocaleSwitcher locale={locale} />
+    </div>
+  );
+}
 
 export function ResetPasswordForm({ locale }: { locale: AppLocale }) {
   const router = useRouter();
@@ -51,8 +61,11 @@ export function ResetPasswordForm({ locale }: { locale: AppLocale }) {
 
   if (!ready) {
     return (
-      <div className="flex w-full max-w-md items-center justify-center rounded-2xl border border-line bg-card p-10">
-        <Spinner className="h-6 w-6" />
+      <div className="flex w-full max-w-md flex-col rounded-2xl border border-line bg-card p-5 sm:p-10">
+        <BrandRow locale={locale} />
+        <div className="flex justify-center py-10">
+          <Spinner className="h-6 w-6" />
+        </div>
       </div>
     );
   }
@@ -60,7 +73,7 @@ export function ResetPasswordForm({ locale }: { locale: AppLocale }) {
   if (!hasSession) {
     return (
       <div className="w-full max-w-md rounded-2xl border border-line bg-card p-5 sm:p-10">
-        <p className="text-lg font-semibold tracking-tight">Puffi</p>
+        <BrandRow locale={locale} />
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.resetTitle}</h1>
         <div className="mt-6">
           <StatusMessage kind="error" title={t.resetExpired} />
@@ -74,7 +87,7 @@ export function ResetPasswordForm({ locale }: { locale: AppLocale }) {
 
   return (
     <div className="w-full max-w-md rounded-2xl border border-line bg-card p-5 sm:p-10">
-      <p className="text-lg font-semibold tracking-tight">Puffi</p>
+      <BrandRow locale={locale} />
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.resetTitle}</h1>
       <form onSubmit={(event) => void onSubmit(event)} className="mt-8 flex flex-col gap-4">
         <label className="flex flex-col gap-1.5 text-sm">

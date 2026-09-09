@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/spinner";
 import { StatusMessage } from "@/components/ui/status-message";
 import { authCopy } from "@/lib/i18n/auth";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ui } from "@/lib/i18n/ui";
 import { getPublicSiteUrl } from "@/lib/site-url";
 import type { AppLocale } from "@/types/database";
@@ -135,7 +136,10 @@ export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
 
   return (
     <div className="w-full max-w-md rounded-2xl border border-line bg-card p-5 sm:p-10">
-      <p className="text-lg font-semibold tracking-tight">Puffi</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-lg font-semibold tracking-tight">Puffi</p>
+        <LocaleSwitcher locale={locale} />
+      </div>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">{forgot ? t.forgotPassword : labels.title}</h1>
       <p className="mt-2 text-sm leading-6 text-foreground/70">{forgot ? t.forgotLead : t.tagline}</p>
 
