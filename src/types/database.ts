@@ -54,6 +54,9 @@ export interface Database {
           skin_goal: SkinGoal | null;
           skin_type: SkinType | null;
           onboarding_completed_at: string | null;
+          timezone: string;
+          remind_am: boolean;
+          remind_pm: boolean;
           created_at: string;
         }>;
         Insert: Insert<{
@@ -64,6 +67,9 @@ export interface Database {
           skin_goal?: SkinGoal | null;
           skin_type?: SkinType | null;
           onboarding_completed_at?: string | null;
+          timezone?: string;
+          remind_am?: boolean;
+          remind_pm?: boolean;
           created_at?: string;
         }>;
         Update: Update<{
@@ -73,6 +79,39 @@ export interface Database {
           skin_goal: SkinGoal | null;
           skin_type: SkinType | null;
           onboarding_completed_at: string | null;
+          timezone: string;
+          remind_am: boolean;
+          remind_pm: boolean;
+        }>;
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: Row<{
+          id: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          last_am_sent_on: string | null;
+          last_pm_sent_on: string | null;
+          created_at: string;
+        }>;
+        Insert: Insert<{
+          id?: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          last_am_sent_on?: string | null;
+          last_pm_sent_on?: string | null;
+          created_at?: string;
+        }>;
+        Update: Update<{
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          last_am_sent_on: string | null;
+          last_pm_sent_on: string | null;
         }>;
         Relationships: [];
       };

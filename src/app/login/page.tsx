@@ -11,7 +11,7 @@ export default async function LoginPage() {
         <LocaleSwitcher locale={locale} />
       </div>
       <Suspense>
-        <AuthForm mode="login" />
+        <AuthForm mode="login" locale={locale} />
       </Suspense>
     </div>
   );

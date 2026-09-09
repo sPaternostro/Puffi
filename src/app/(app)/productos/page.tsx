@@ -11,6 +11,7 @@ import { categoryLabel } from "@/lib/product-categories";
 import { FREE_PRODUCT_LIMIT, MIN_PRODUCTS_FOR_ROUTINE } from "@/lib/plans";
 import { getLocale } from "@/lib/i18n/locale";
 import { fill, ui, displayProductName } from "@/lib/i18n/ui";
+import { getSessionPlan } from "@/lib/user/plan";
 
 export default async function ProductsPage({
   searchParams,
@@ -21,7 +22,9 @@ export default async function ProductsPage({
   const { routine, needsRefresh } = await getRoutineAction();
   const params = await searchParams;
   const locale = await getLocale();
+  const plan = await getSessionPlan();
   const t = ui(locale);
+  const isPro = plan === "premium";
 
   return (
     <div>
@@ -31,8 +34,10 @@ export default async function ProductsPage({
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.products}</h1>
           <p className="mt-2 max-w-xl text-sm text-foreground/70">
             {shelf.length === 0
-              ? t.emptyShelfLead
-              : fill(t.shelfCount, {
+              ? isPro
+                ? t.emptyShelfLead
+                : fill(t.emptyShelfLeadFree, { max: FREE_PRODUCT_LIMIT })
+              : fill(isPro ? t.shelfCountPro : t.shelfCountFree, {
                   count: shelf.length,
                   s: shelf.length === 1 ? "" : "s",
                   max: FREE_PRODUCT_LIMIT,

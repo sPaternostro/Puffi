@@ -6,27 +6,13 @@ import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/spinner";
 import { StatusMessage } from "@/components/ui/status-message";
+import { authCopy } from "@/lib/i18n/auth";
+import { ui } from "@/lib/i18n/ui";
+import type { AppLocale } from "@/types/database";
 
 type Mode = "login" | "signup";
 
-const copy = {
-  login: {
-    title: "Entrar",
-    submit: "Entrar",
-    switchHint: "¿No tienes cuenta?",
-    switchLink: "Crear cuenta",
-    switchHref: "/signup",
-  },
-  signup: {
-    title: "Crear cuenta",
-    submit: "Crear cuenta",
-    switchHint: "¿Ya tienes cuenta?",
-    switchLink: "Entrar",
-    switchHref: "/login",
-  },
-} as const;
-
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({ mode, locale }: { mode: Mode; locale: AppLocale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -34,16 +20,30 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const t = authCopy(locale);
+  const chrome = ui(locale);
 
   const oauthError = useMemo(
-    () =>
-      searchParams.get("error") === "oauth"
-        ? "No se pudo completar el acceso con Google."
-        : null,
-    [searchParams],
+    () => (searchParams.get("error") === "oauth" ? t.oauthFail : null),
+    [searchParams, t.oauthFail],
   );
 
-  const labels = copy[mode];
+  const labels =
+    mode === "login"
+      ? {
+          title: t.loginTitle,
+          submit: t.loginSubmit,
+          switchHint: t.loginSwitchHint,
+          switchLink: t.loginSwitchLink,
+          switchHref: "/signup",
+        }
+      : {
+          title: t.signupTitle,
+          submit: t.signupSubmit,
+          switchHint: t.signupSwitchHint,
+          switchLink: t.signupSwitchLink,
+          switchHref: "/login",
+        };
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -60,7 +60,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       });
       setLoading(false);
       if (signInError) {
-        setError("Email o contraseña no coinciden. Revisalos e intentá de nuevo.");
+        setError(t.badCredentials);
         return;
       }
       router.push("/");
@@ -78,7 +78,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     setLoading(false);
 
     if (signUpError) {
-      setError("No pudimos crear la cuenta. Probá con otro email o entrá si ya tenés una.");
+      setError(t.signupFail);
       return;
     }
 
@@ -88,7 +88,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       return;
     }
 
-    setInfo("Te enviamos un email para confirmar la cuenta. Revisa tu bandeja.");
+    setInfo(t.confirmEmail);
   }
 
   async function onGoogle() {
@@ -101,7 +101,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       },
     });
     if (oauthError) {
-      setError("No se pudo abrir Google. Usá email y contraseña, o reintentá en un momento.");
+      setError(t.oauthOpenFail);
     }
   }
 
@@ -109,24 +109,22 @@ export function AuthForm({ mode }: { mode: Mode }) {
     <div className="w-full max-w-md rounded-2xl border border-line bg-card p-8 sm:p-10">
       <p className="text-lg font-semibold tracking-tight">Puffi</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">{labels.title}</h1>
-      <p className="mt-2 text-sm leading-6 text-foreground/70">
-        Rutinas de skincare con el orden correcto.
-      </p>
+      <p className="mt-2 text-sm leading-6 text-foreground/70">{t.tagline}</p>
 
       <button type="button" onClick={onGoogle} className="btn-secondary mt-8 w-full">
         <GoogleIcon />
-        Continuar con Google
+        {t.continueGoogle}
       </button>
 
       <div className="my-6 flex items-center gap-3 text-xs tracking-wide text-foreground/40 uppercase">
         <span className="h-px flex-1 bg-foreground/10" />
-        o con email
+        {t.orEmail}
         <span className="h-px flex-1 bg-foreground/10" />
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1.5 text-sm">
-          Email
+          {t.email}
           <input
             type="email"
             required
@@ -137,7 +135,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           />
         </label>
         <label className="flex flex-col gap-1.5 text-sm">
-          Contraseña
+          {t.password}
           <input
             type="password"
             required
@@ -151,21 +149,19 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
         {error || oauthError ? (
           <StatusMessage kind="error" title={error ?? oauthError ?? ""}>
-            {oauthError
-              ? "Volvé a intentar con Google o entrá con email."
-              : "Si olvidaste la contraseña, creá la cuenta de nuevo o usá Google."}
+            {oauthError ? t.oauthHint : t.passwordHint}
           </StatusMessage>
         ) : null}
         {info ? (
           <StatusMessage kind="success" title={info}>
-            Si no llega, revisá spam. Después podés entrar desde esta misma pantalla.
+            {t.confirmEmailHint}
           </StatusMessage>
         ) : null}
 
         <button type="submit" disabled={loading} className="btn-primary mt-2 w-full">
           {loading ? (
             <>
-              <Spinner /> {mode === "login" ? "Entrando…" : "Creando cuenta…"}
+              <Spinner /> {mode === "login" ? t.loggingIn : t.creatingAccount}
             </>
           ) : (
             labels.submit
@@ -180,9 +176,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </Link>
       </p>
       <p className="mt-4 text-center text-[11px] leading-5 text-foreground/45">
-        Al entrar aceptás que Puffi no reemplaza consejo médico.{" "}
+        {t.acceptLegal}{" "}
         <Link href="/legal" className="underline">
-          Aviso legal
+          {chrome.legal}
         </Link>
       </p>
     </div>

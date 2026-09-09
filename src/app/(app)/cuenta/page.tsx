@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { HowToUseCard } from "@/components/layout/how-to-use";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
+import { NotificationSettings } from "@/components/pwa/notification-settings";
+import { PlanCards } from "@/components/account/plan-cards";
 import { getLocale } from "@/lib/i18n/locale";
 import { ui } from "@/lib/i18n/ui";
 import Link from "next/link";
@@ -20,7 +23,7 @@ export default async function AccountPage() {
   const locale = await getLocale();
   const { data: profile } = await supabase
     .from("users")
-    .select("email, plan, locale")
+    .select("email, plan, locale, remind_am, remind_pm")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -35,17 +38,32 @@ export default async function AccountPage() {
             <dt className="text-foreground/60">Email</dt>
             <dd className="text-right">{profile?.email ?? user.email}</dd>
           </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-foreground/60">Plan</dt>
-            <dd className="capitalize">{profile?.plan ?? "free"}</dd>
-          </div>
-          <div className="flex items-center justify-between gap-4 border-t border-line pt-3">
+          <div className="flex items-center justify-between gap-4 pt-1">
             <dt className="text-foreground/60">{t.language}</dt>
             <dd>
               <LocaleSwitcher locale={locale} />
             </dd>
           </div>
         </dl>
+        <div className="mt-6 border-t border-line pt-4">
+          <PlanCards locale={locale} plan={profile?.plan ?? "free"} />
+        </div>
+        <div className="mt-6 border-t border-line pt-4">
+          <p className="text-sm text-foreground/60">{t.addToHome}</p>
+          <div className="mt-2">
+            <InstallAppButton locale={locale} />
+          </div>
+        </div>
+        <div className="mt-6 border-t border-line pt-4">
+          <p className="text-sm text-foreground/60">{t.reminders}</p>
+          <div className="mt-2">
+            <NotificationSettings
+              locale={locale}
+              remindAm={profile?.remind_am ?? true}
+              remindPm={profile?.remind_pm ?? true}
+            />
+          </div>
+        </div>
         <p className="mt-6 text-xs leading-5 text-foreground/55">
           {locale === "en"
             ? "Puffi does not replace a doctor. Product data comes from public sources and from what you add."

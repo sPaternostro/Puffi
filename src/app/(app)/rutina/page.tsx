@@ -3,16 +3,18 @@ import { Droplets, Moon, Shield, Sparkles, Sun, Wind } from "lucide-react";
 import { getRoutineAction } from "@/lib/routine/actions";
 import { GenerateRoutineButton } from "@/components/routine/generate-routine-button";
 import { RoutineRefreshBanner } from "@/components/routine/routine-refresh-banner";
+import RoutineSetsBar from "@/components/routine/routine-sets-bar";
 import { ingredientLabel } from "@/lib/ingredients";
 import { getLocale } from "@/lib/i18n/locale";
 import { fill, ui, displayProductName } from "@/lib/i18n/ui";
 import type { RoutineSuggestion } from "@/lib/routine/engine";
 
 export default async function RoutinePage() {
-  const { shelfCount, min, needsRefresh, routine } = await getRoutineAction();
+  const { shelfCount, min, needsRefresh, routine, sets, plan } = await getRoutineAction();
   const locale = await getLocale();
   const t = ui(locale);
   const canGenerate = shelfCount >= min;
+  const isPro = plan === "premium";
 
   return (
     <div>
@@ -29,6 +31,9 @@ export default async function RoutinePage() {
         </div>
         {canGenerate && !routine ? (
           <GenerateRoutineButton label={t.generateRoutine} locale={locale} />
+        ) : null}
+        {canGenerate && routine && isPro ? (
+          <GenerateRoutineButton label={t.newRoutine} locale={locale} asNew askName />
         ) : null}
       </div>
 
@@ -58,6 +63,8 @@ export default async function RoutinePage() {
           </p>
         </div>
       ) : null}
+
+      {routine ? <RoutineSetsBar locale={locale} plan={plan} sets={sets} /> : null}
 
       {routine ? (
         <div className="mt-8 grid gap-6 md:grid-cols-2">

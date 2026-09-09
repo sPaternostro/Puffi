@@ -4,26 +4,13 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { completeOnboardingAction } from "@/lib/onboarding/actions";
 import { Spinner } from "@/components/ui/spinner";
-import { LEGAL_SHORT } from "@/lib/legal";
-import type { SkinGoal, SkinType } from "@/types/database";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { legalCopy } from "@/lib/legal";
+import { onboardingCopy } from "@/lib/i18n/onboarding";
+import { ui } from "@/lib/i18n/ui";
+import type { AppLocale, SkinGoal, SkinType } from "@/types/database";
 
-const GOALS: { value: SkinGoal; label: string; hint: string }[] = [
-  { value: "acne", label: "Tratar o prevenir acné", hint: "Brotes, puntos negros, textura irregular" },
-  { value: "anti_aging", label: "Cuidado anti-edad", hint: "Firmeza, líneas, prevención" },
-  { value: "dark_spots", label: "Atenuación de manchas", hint: "Manchas de sol, marcas de acné" },
-  { value: "hydration", label: "Más hidratación", hint: "Tirantez, sequedad" },
-  { value: "sensitive", label: "Calmar piel sensible", hint: "Rojez, picazón, reactividad" },
-];
-
-const TYPES: { value: SkinType; label: string }[] = [
-  { value: "dry", label: "Seca" },
-  { value: "oily", label: "Grasa" },
-  { value: "combination", label: "Mixta" },
-  { value: "normal", label: "Normal" },
-  { value: "sensitive", label: "Sensible" },
-];
-
-export function OnboardingFlow() {
+export function OnboardingFlow({ locale }: { locale: AppLocale }) {
   const [step, setStep] = useState(0);
   const [goals, setGoals] = useState<SkinGoal[]>([]);
   const [skinType, setSkinType] = useState<SkinType | null>(null);
@@ -31,6 +18,9 @@ export function OnboardingFlow() {
   const [showTypeGuide, setShowTypeGuide] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [pending, startTransition] = useTransition();
+  const t = onboardingCopy(locale);
+  const chrome = ui(locale);
+  const legal = legalCopy(locale);
 
   function toggleGoal(value: SkinGoal) {
     setGoals((current) =>
@@ -50,20 +40,16 @@ export function OnboardingFlow() {
   return (
     <div className="flex min-h-full items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg">
-        <p className="text-lg font-semibold">Puffi</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-lg font-semibold">Puffi</p>
+          <LocaleSwitcher locale={locale} />
+        </div>
 
         {step === 0 ? (
           <>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight">Primero, tus productos</h1>
-            <p className="mt-3 text-sm leading-7 text-foreground/75">
-              Cargá lo que <strong>ya tenés en el baño</strong> (o lo que estás por comprar, para ver
-              si combina). Puffi ordena mañana y noche y avisa si hay activos que no deberían usarse
-              juntos. Con 1 producto ya podés generar una rutina; con 2 o 3 se vuelve más útil. No
-              hace falta llegar a 8.
-            </p>
-            <p className="mt-3 text-sm leading-7 text-foreground/75">
-              Más adelante te vamos a sugerir qué te falta según tu objetivo, por ejemplo un sérum.
-            </p>
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight">{t.productsTitle}</h1>
+            <p className="mt-3 text-sm leading-7 text-foreground/75">{t.productsBody1}</p>
+            <p className="mt-3 text-sm leading-7 text-foreground/75">{t.productsBody2}</p>
             <label className="mt-6 flex items-start gap-3 rounded-xl border border-line bg-card p-4 text-sm leading-6">
               <input
                 type="checkbox"
@@ -72,9 +58,9 @@ export function OnboardingFlow() {
                 onChange={(event) => setAccepted(event.target.checked)}
               />
               <span>
-                Entiendo que Puffi no reemplaza a un médico. {LEGAL_SHORT}{" "}
+                {t.legalLead} {legal.short}{" "}
                 <Link href="/legal" className="underline">
-                  Aviso legal
+                  {chrome.legal}
                 </Link>
               </span>
             </label>
@@ -85,7 +71,7 @@ export function OnboardingFlow() {
                 disabled={!accepted}
                 onClick={() => setStep(1)}
               >
-                Continuar
+                {t.continue}
               </button>
             </div>
           </>
@@ -93,15 +79,10 @@ export function OnboardingFlow() {
 
         {step === 1 ? (
           <>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight">
-              ¿Qué te gustaría mejorar o cuidar?
-            </h1>
-            <p className="mt-2 text-sm text-foreground/70">
-              Opcional. <strong>Podés marcar más de una.</strong> No es un diagnóstico: es para
-              priorizar la rutina.
-            </p>
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight">{t.goalsTitle}</h1>
+            <p className="mt-2 text-sm text-foreground/70">{t.goalsHint}</p>
             <div className="mt-6 flex flex-col gap-2">
-              {GOALS.map((item) => (
+              {t.goals.map((item) => (
                 <button
                   key={item.value}
                   type="button"
@@ -120,14 +101,14 @@ export function OnboardingFlow() {
             </div>
             <div className="mt-6 flex justify-between gap-2">
               <button type="button" className="btn-secondary" onClick={() => setStep(0)}>
-                Atrás
+                {t.back}
               </button>
               <div className="flex gap-2">
                 <button type="button" className="btn-secondary" onClick={() => setStep(2)}>
-                  Saltar
+                  {t.skip}
                 </button>
                 <button type="button" className="btn-primary" onClick={() => setStep(2)}>
-                  Continuar
+                  {t.continue}
                 </button>
               </div>
             </div>
@@ -136,39 +117,26 @@ export function OnboardingFlow() {
 
         {step === 2 ? (
           <>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight">¿Cómo describirías tu piel?</h1>
-            <p className="mt-2 text-sm text-foreground/70">
-              Opcional. Elegí <strong>una</strong>. Si no estás segura, usá «No sé».
-            </p>
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight">{t.typesTitle}</h1>
+            <p className="mt-2 text-sm text-foreground/70">{t.typesHint}</p>
             <button
               type="button"
               className="mt-3 text-sm underline"
               onClick={() => setShowTypeGuide((value) => !value)}
             >
-              {showTypeGuide ? "Ocultar guía" : "Cómo distinguirlo"}
+              {showTypeGuide ? t.hideGuide : t.showGuide}
             </button>
             {showTypeGuide ? (
               <ul className="mt-3 space-y-2 rounded-xl border border-line bg-card p-4 text-sm leading-6 text-foreground/75">
-                <li>
-                  <strong>Seca:</strong> tira, se ve opaca, a veces descama.
-                </li>
-                <li>
-                  <strong>Grasa:</strong> brillo en casi toda la cara, poros más visibles.
-                </li>
-                <li>
-                  <strong>Mixta:</strong> zona T (frente, nariz, mentón) más grasa; mejillas más normales o
-                  secas.
-                </li>
-                <li>
-                  <strong>Normal:</strong> cómoda la mayor parte del día, sin extremos.
-                </li>
-                <li>
-                  <strong>Sensible:</strong> se enrojece o pica fácil con productos nuevos.
-                </li>
+                {t.guide.map((item) => (
+                  <li key={item.name}>
+                    <strong>{item.name}:</strong> {item.body}
+                  </li>
+                ))}
               </ul>
             ) : null}
             <div className="mt-6 flex flex-col gap-2">
-              {TYPES.map((item) => (
+              {t.types.map((item) => (
                 <button
                   key={item.value}
                   type="button"
@@ -195,24 +163,24 @@ export function OnboardingFlow() {
                   unsureType ? "border-primary-strong bg-accent/60" : "border-line bg-card"
                 }`}
               >
-                No sé
+                {t.unsure}
               </button>
             </div>
             <div className="mt-6 flex justify-between gap-2">
               <button type="button" className="btn-secondary" onClick={() => setStep(1)}>
-                Atrás
+                {t.back}
               </button>
               <div className="flex gap-2">
                 <button type="button" className="btn-secondary" onClick={finish} disabled={pending}>
-                  Saltar
+                  {t.skip}
                 </button>
                 <button type="button" className="btn-primary" onClick={finish} disabled={pending}>
                   {pending ? (
                     <>
-                      <Spinner /> Guardando…
+                      <Spinner /> {chrome.saving}
                     </>
                   ) : (
-                    "Ir a mis productos"
+                    t.goToProducts
                   )}
                 </button>
               </div>

@@ -11,7 +11,7 @@ export default async function SignupPage() {
         <LocaleSwitcher locale={locale} />
       </div>
       <Suspense>
-        <AuthForm mode="signup" />
+        <AuthForm mode="signup" locale={locale} />
       </Suspense>
     </div>
   );
